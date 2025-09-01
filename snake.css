@@ -29,6 +29,7 @@ canvas {
     justify-content: center;
     align-items: flex-start;
     gap: 20px;
+    position: relative; /* 버튼 위치를 위한 상대 위치 설정 */
 }
 #controls {
     font-family: Arial, sans-serif;
@@ -50,4 +51,27 @@ canvas {
 }
 #controls li {
     margin-bottom: 5px;
+}
+/* 모바일에서 조작법 숨기기 */
+@media only screen and (max-width: 768px) {
+    #controls {
+        display: none;
+    }
+}
+#pause-button {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    padding: 10px 20px;
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    z-index: 10;
+}
+#pause-button:hover {
+    background-color: #0056b3;
 }

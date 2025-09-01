@@ -1,5 +1,6 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
+const pauseButton = document.getElementById('pause-button');
 const GRID_SIZE = 20;
 const GRID_WIDTH = canvas.width / GRID_SIZE;
 const GRID_HEIGHT = canvas.height / GRID_SIZE;
@@ -22,6 +23,8 @@ let showNextFood = document.getElementById('showNextFood').checked;
 let nextFood = null;
 let isPaused = false;
 const pressedKeys = new Set();
+let touchStartX = 0;
+let touchStartY = 0;
 
 document.getElementById('showNextFood').addEventListener('change', () => {
     showNextFood = document.getElementById('showNextFood').checked;
@@ -80,9 +83,8 @@ function draw() {
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Draw snake body (less vibrant green for body, darker green for head)
     snake.body.forEach((segment, index) => {
-        ctx.fillStyle = index === 0 ? '#006400' : '#32CD32'; // Darker green for head, lime green for body
+        ctx.fillStyle = index === 0 ? '#006400' : '#32CD32';
         ctx.fillRect(segment[0] * GRID_SIZE, segment[1] * GRID_SIZE, GRID_SIZE, GRID_SIZE);
     });
 
@@ -131,11 +133,13 @@ function resetGame() {
     directionQueue = [];
     showNextFood = document.getElementById('showNextFood').checked;
     isPaused = false;
+    pauseButton.textContent = '일시정지';
     pressedKeys.clear();
 }
 
 nextFood = getNextFoodPosition();
 
+// 키보드 입력 처리
 document.addEventListener('keydown', (event) => {
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
         event.preventDefault();
@@ -148,6 +152,7 @@ document.addEventListener('keydown', (event) => {
 
     if (event.key.toLowerCase() === 'p') {
         isPaused = !isPaused;
+        pauseButton.textContent = isPaused ? '재개' : '일시정지';
         return;
     }
 
@@ -163,8 +168,14 @@ document.addEventListener('keydown', (event) => {
         else if (event.key === 'ArrowRight') directionQueue.push('RIGHT');
     }
 });
+
+document.addEventListener('keyup', (event) => {
+    pressedKeys.delete(event.key);
+});
+
+// 터치 입력 처리
 canvas.addEventListener('touchstart', (event) => {
-    event.preventDefault(); // 기본 터치 동작(스크롤 등) 방지
+    event.preventDefault();
     const touch = event.touches[0];
     touchStartX = touch.clientX;
     touchStartY = touch.clientY;
@@ -178,25 +189,28 @@ canvas.addEventListener('touchmove', (event) => {
         const touchEndY = touch.clientY;
         const deltaX = touchEndX - touchStartX;
         const deltaY = touchEndY - touchStartY;
-        const minSwipeDistance = 5; // 스와이프 감지를 위한 최소 거리
+        const minSwipeDistance = 15;
 
         if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > minSwipeDistance) {
-            // 수평 스와이프
             if (deltaX > 0) directionQueue.push('RIGHT');
             else directionQueue.push('LEFT');
         } else if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > minSwipeDistance) {
-            // 수직 스와이프
             if (deltaY > 0) directionQueue.push('DOWN');
             else directionQueue.push('UP');
         }
 
-        // 터치 시작점 갱신
         touchStartX = touchEndX;
         touchStartY = touchEndY;
     }
 });
-document.addEventListener('keyup', (event) => {
-    pressedKeys.delete(event.key);
+
+// 일시정지 버튼 클릭 처리
+pauseButton.addEventListener('click', () => {
+    if (!gameOver) {
+        isPaused = !isPaused;
+        pauseButton.textContent = isPaused ? '재개' : '일시정지';
+    }
 });
 
+// 게임 루프
 setInterval(update, 1000 / FPS);
