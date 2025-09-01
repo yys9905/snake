@@ -1,6 +1,8 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const pauseButton = document.getElementById('pause-button');
+const sensitivitySlider = document.getElementById('sensitivity');
+const sensitivityValue = document.getElementById('sensitivity-value');
 const GRID_SIZE = 20;
 const GRID_WIDTH = canvas.width / GRID_SIZE;
 const GRID_HEIGHT = canvas.height / GRID_SIZE;
@@ -25,9 +27,16 @@ let isPaused = false;
 const pressedKeys = new Set();
 let touchStartX = 0;
 let touchStartY = 0;
+let minSwipeDistance = parseInt(sensitivitySlider.value); // 초기 감도 값
 
 document.getElementById('showNextFood').addEventListener('change', () => {
     showNextFood = document.getElementById('showNextFood').checked;
+});
+
+// 스와이프 감도 업데이트
+sensitivitySlider.addEventListener('input', () => {
+    minSwipeDistance = parseInt(sensitivitySlider.value);
+    sensitivityValue.textContent = minSwipeDistance;
 });
 
 function getNextFoodPosition() {
@@ -189,7 +198,6 @@ canvas.addEventListener('touchmove', (event) => {
         const touchEndY = touch.clientY;
         const deltaX = touchEndX - touchStartX;
         const deltaY = touchEndY - touchStartY;
-        const minSwipeDistance = 15;
 
         if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > minSwipeDistance) {
             if (deltaX > 0) directionQueue.push('RIGHT');
