@@ -163,7 +163,38 @@ document.addEventListener('keydown', (event) => {
         else if (event.key === 'ArrowRight') directionQueue.push('RIGHT');
     }
 });
+canvas.addEventListener('touchstart', (event) => {
+    event.preventDefault(); // 기본 터치 동작(스크롤 등) 방지
+    const touch = event.touches[0];
+    touchStartX = touch.clientX;
+    touchStartY = touch.clientY;
+});
 
+canvas.addEventListener('touchmove', (event) => {
+    event.preventDefault();
+    if (!gameOver && !isPaused && directionQueue.length < 2) {
+        const touch = event.touches[0];
+        const touchEndX = touch.clientX;
+        const touchEndY = touch.clientY;
+        const deltaX = touchEndX - touchStartX;
+        const deltaY = touchEndY - touchStartY;
+        const minSwipeDistance = 5; // 스와이프 감지를 위한 최소 거리
+
+        if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > minSwipeDistance) {
+            // 수평 스와이프
+            if (deltaX > 0) directionQueue.push('RIGHT');
+            else directionQueue.push('LEFT');
+        } else if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > minSwipeDistance) {
+            // 수직 스와이프
+            if (deltaY > 0) directionQueue.push('DOWN');
+            else directionQueue.push('UP');
+        }
+
+        // 터치 시작점 갱신
+        touchStartX = touchEndX;
+        touchStartY = touchEndY;
+    }
+});
 document.addEventListener('keyup', (event) => {
     pressedKeys.delete(event.key);
 });
